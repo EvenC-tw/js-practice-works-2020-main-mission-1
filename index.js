@@ -1,28 +1,36 @@
 const $ = document.querySelector.bind(document)
 const $$ = document.querySelectorAll.bind(document)
-let data = {
-	todoList: [
-		{
-			content: '第一個todo',
-			checkStatus: false,
-			id: getRandomId(),
-		},
-		{
-			content: '第二個todo',
-			checkStatus: true,
-			id: getRandomId(),
-		},
-	],
+const data = {
+	newTodo: '',
+	todoList: JSON.parse(localStorage.getItem('todoList')) || [],
 }
+
 function render() {
-	const { todoList } = data
+	const { todoList, newTodo } = data
+	localStorage.setItem('todoList', JSON.stringify(todoList))
+
 	$('#todoList').innerHTML = `${renderTodoList(todoList)}`
-	$('#taskCount').textContent = todoList.filter((item) => !item.checkStatus).length
+	$('#newTodo').value = newTodo
+	const pendingTaskCount = todoList.filter((item) => !item.checkStatus).length
+	const finishedTaskCount = todoList.filter((item) => item.checkStatus).length
+	$('#pendingTaskCount').textContent = pendingTaskCount
+	$('#finishedTaskCount').textContent = finishedTaskCount
+
+	if (pendingTaskCount === 0 && finishedTaskCount === 0) {
+		$('#taskCount').classList.add('d-none')
+		$('#taskCount').classList.remove('d-flex')
+	} else {
+		$('#taskCount').classList.add('d-flex')
+		$('#taskCount').classList.remove('d-none')
+	}
+
 	$('#clearTask').addEventListener('click', clearTodoList)
 	$('#addTodo').addEventListener('click', addTodoListItem)
 	$$('.deleteTodo').forEach((btn) => {
-		console.log(btn)
 		btn.addEventListener('click', deleteTodoListItem)
+	})
+	$$('.checkTodo').forEach((btn) => {
+		btn.addEventListener('click', checkTodoListItem)
 	})
 }
 
@@ -31,12 +39,14 @@ function renderTodoList(todoList) {
 		.map(
 			(item) =>
 				`<li class='list-group-item list-group-item-action d-flex justify-content-between align-items-center${
-					item.checkStatus ? ' list-group-item-success' : ' disabled'
-				}' data-check='${item.checkStatus}' ${item.checkStatus ? '' : ' aria-disabled="true"'}>${
+					item.checkStatus ? ' list-group-item-success' : ''
+				}' data-check='${item.checkStatus}' data-id='${
+					item.id
+				}'><div class="form-check d-flex"><label class="d-flex align-items-center"><input type="checkbox" class="form-check-input checkTodo" aria-label="Checkbox"${
+					item.checkStatus ? ' checked/>' : '/>'
+				}${
 					item.content
-				}<button class="btn btn-danger deleteTodo${
-					item.checkStatus ? ' d-none' : ''
-				}" data-id='${item.id}'>delete</button></li>`
+				}</label></div><button type="button" class="close px-3 deleteTodo" aria-label="Close"><span aria-hidden="true">&times;</span></button></li>`
 		)
 		.join('')
 }
@@ -47,22 +57,34 @@ function clearTodoList() {
 }
 
 function addTodoListItem() {
-	const newTodo = $('#newTodo').value
+	const content = $('#newTodo').value
 	data.todoList.push({
-		content: newTodo,
+		content: content,
 		checkStatus: false,
 		id: getRandomId(),
 	})
+	data.newTodo = ''
 	render()
 }
 
 function deleteTodoListItem(event) {
-	const id = ~~event.target.dataset.id
+	const id = ~~event.target.closest('li').dataset.id
 	data.todoList = data.todoList.filter((item) => item.id !== id)
+	render()
+}
+
+function checkTodoListItem(event) {
+	const id = ~~event.target.closest('li').dataset.id
+	data.todoList.forEach((item) => {
+		if (item.id === id) {
+			item.checkStatus = !item.checkStatus
+		}
+	})
 	render()
 }
 
 function getRandomId() {
 	return Math.abs(~~(Math.random() * new Date().getTime()))
 }
+
 render()
