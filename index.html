@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+			integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<title>Document</title>
+		<style>
+			.completed {
+				text-decoration: line-through
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="app" class="container my-3">
+			<div class="input-group mb-3">
+				<div class="input-group-prepend">
+					<span class="input-group-text">待辦事項</span>
+				</div>
+				<input type="text" class="form-control" placeholder="準備要做的任務" id="newTodo">
+				<div class="input-group-append">
+					<button class="btn btn-primary" type="button" id="addTodo">新增</button>
+				</div>
+			</div>
+			<div class="card text-center">
+				<ul class="list-group list-group-flush text-left" id="todoList">
+				</ul>
+				<div class="card-footer d-flex justify-content-between">
+					<span>還有 <span id="taskCount">0</span> 筆任務</span>
+					<a href="#" id="clearTask">清除所有任務</a>
+				</div>
+			</div>
+		</div>
+		<script src="index.js"></script>
+	</body>
+
+</html>
