@@ -7,6 +7,9 @@ const $$ = document.querySelectorAll.bind(document)
 const data = {
 	newTodo: '',
 	todoList: JSON.parse(localStorage.getItem('todoList')) || [],
+	clearModal: {
+		status: false,
+	},
 }
 
 /*
@@ -14,18 +17,24 @@ method
 主要渲染
  */
 function render() {
-	const { todoList, newTodo } = data
+	const { todoList, newTodo, clearModal } = data
 	localStorage.setItem('todoList', JSON.stringify(todoList))
 
 	$('#todoList').innerHTML = renderTodoList(todoList)
 	$('#taskCount').outerHTML = renderTaskCount(todoList)
 	$('#newTodo').value = newTodo
+	$('#clearTodoListModal').outerHTML = renderClearModal(clearModal)
 
-	$('#clearTask') && $('#clearTask').addEventListener('click', clearTodoList)
+	$('#clearTask') && $('#clearTask').addEventListener('click', toggleClearModal)
 	$('#addTodo').addEventListener('click', addTodoListItem)
 	$('#newTodo').addEventListener('keydown', addTodoListItem)
 	$('#todoList').addEventListener('click', deleteTodoListItem)
 	$('#todoList').addEventListener('click', checkTodoListItem)
+
+	$$('[data-dismiss=clearTodoListModal]').forEach((element) => {
+		element.addEventListener('click', toggleClearModal)
+	})
+	$('[data-confirm=clearTodoListModal]').addEventListener('click', clearTodoList)
 }
 
 /*
@@ -33,10 +42,10 @@ method
 列表部分渲染
  */
 function renderTodoList(todoList) {
-	const today = new Date()
+	const todayDate = new Date(new Date().toLocaleDateString())
 	return todoList
 		.map((item, index) => {
-			const dateDiff = diffDate(new Date(item.date), today)
+			const dateDiff = diffDate(new Date(item.date), todayDate)
 			return `<li class='list-group-item list-group-item-action d-flex justify-content-between align-items-center${
 				item.checkStatus ? ' list-group-item-success' : ''
 			}' data-check='${item.checkStatus}' data-id='${
@@ -69,11 +78,40 @@ function renderTaskCount(todoList) {
 		return ``
 	} else {
 		result += `	<p id="pendingTaskCount" class="mb-0">雖然還有<span class="text-danger"> ${pendingTaskCount} </span>筆任務未完成</p>
-					<p id="finishedTaskCount" class="mb-0">但努力如你，已經完成 <span class="text-success">${finishedTaskCount}</span> 筆任務囉!</p>
+					<p id="finishedTaskCount" class="mb-0">但努力如你，已經完成 <span class="text-success">${finishedTaskCount}</span> 筆囉!</p>
 				`
 	}
-	result += `</div><a href="#" id="clearTask">清除所有任務</a></div>`
+	result += `</div><button type="button" id="clearTask" class="btn btn-warning">清空任務</button></div>`
 	return result
+}
+
+/*
+method
+彈窗部分渲染
+*/
+function renderClearModal(clearModal) {
+	const { status } = clearModal
+	return `
+		<div class="modal${status ? ' modal-show' : ''}" tabindex="-1" role="dialog" id="clearTodoListModal">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">要清除全部任務嗎?</h5>
+						<button type="button" class="close" data-dismiss="clearTodoListModal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<p>點擊確定將會清除所有已完成和未完成的任務喔!</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="clearTodoListModal">不要好了</button>
+						<button type="button" class="btn btn-primary" data-confirm="clearTodoListModal">確定要清</button>
+					</div>
+				</div>
+			</div>
+		</div>
+`
 }
 
 /*
@@ -127,6 +165,7 @@ event handler
  */
 const clearTodoList = handlerProxy(() => {
 	data.todoList = []
+	data.clearModal.status = false
 })
 
 /*
@@ -173,6 +212,14 @@ const checkTodoListItem = handlerProxy(() => {
 			}
 		})
 	}
+})
+
+/*
+event handler
+關閉彈窗
+ */
+const toggleClearModal = handlerProxy(() => {
+	data.clearModal.status = !data.clearModal.status
 })
 
 render()

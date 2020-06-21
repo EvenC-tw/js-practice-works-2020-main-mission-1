@@ -28,6 +28,14 @@
 			label:hover {
 				cursor: pointer;
 			}
+
+			#clearTask {
+				max-width: calc(2rem + ((.75rem + 1px) * 2));
+			}
+
+			.modal.modal-show {
+				display: block;
+			}
 		</style>
 	</head>
 
@@ -47,6 +55,7 @@
 				<div id="taskCount" class="card-footer d-flex justify-content-between align-items-center"></div>
 			</div>
 		</div>
+		<div class="modal" tabindex="-1" role="dialog" id="clearTodoListModal"></div>
 		<script src="index.js"></script>
 	</body>
 
