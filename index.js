@@ -20,6 +20,7 @@ function render() {
 	const { todoList, newTodo, clearModal } = data
 	localStorage.setItem('todoList', JSON.stringify(todoList))
 
+	$('#progressBar').innerHTML = renderProgressBar(todoList)
 	$('#todoList').innerHTML = renderTodoList(todoList)
 	$('#taskCount').outerHTML = renderTaskCount(todoList)
 	$('#newTodo').value = newTodo
@@ -39,6 +40,17 @@ function render() {
 
 /*
 method
+進度部分渲染
+ */
+function renderProgressBar(todoList) {
+	const finishedTaskCount = todoList.filter((item) => item.checkStatus).length
+	const totalTaskCount = todoList.length
+	const percentage = Math.round((finishedTaskCount / totalTaskCount) * 100)
+	return `<div class="progress-bar bg-success" style="width:${percentage}%" role="progressbar" aria-valuenow="${percentage}" aria-valuemin="0" aria-valuemax="100"></div>`
+}
+
+/*
+method
 列表部分渲染
  */
 function renderTodoList(todoList) {
@@ -50,7 +62,7 @@ function renderTodoList(todoList) {
 				item.checkStatus ? ' list-group-item-success' : ''
 			}' data-check='${item.checkStatus}' data-id='${
 				index + 1
-			}'><div class="form-check d-flex"><label class="d-flex align-items-center checkTodo label"><input type="checkbox" class="form-check-input checkTodo" aria-label="Checkbox"${
+			}'><div class="form-check d-flex"><label class="d-flex align-items-center checkTodo label px-3"><input type="checkbox" class="form-check-input checkTodo" aria-label="Checkbox"${
 				item.checkStatus ? ' checked/>' : '/>'
 			}${item.content}</label></div><div><small>${
 				dateDiff ? dateDiff + ' days ago' : 'today'
